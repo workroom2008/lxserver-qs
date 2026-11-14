@@ -101,7 +101,7 @@ const config: LX.Config = {
   'subsonic.enableDebug': false, // 是否开启 Subsonic 调试日志模式
   'subsonic.onlineSearch': true, // 是否开启 Subsonic 在线全网搜索
   'subsonic.onlineSearchMode': 'fallback', // 在线搜索模式: fallback | merge | local_only
-  'subsonic.onlineSearchSources': 'wy,tx,kw,kg,mg', // 在线搜索默认平台
+  'subsonic.onlineSearchSources': 'wy,tx,kw,kg,mg,qs', // 在线搜索默认平台
   'subsonic.localPlaylist': true, // 返回当前用户的本地歌曲只读歌单，排在歌单列表首位
   'subsonic.customPlaylist': true, // 本地歌单开启时，单独返回自定义目录歌单
   'subsonic.cachePlaylist': false, // 本地歌曲歌单是否包含 cache 目录歌曲
@@ -126,7 +126,7 @@ const config: LX.Config = {
   'subsonic.openlistDelivery': 'direct', // OpenList 命中后交付方式：direct=给直链(302)，proxy=服务端代理转发
   'subsonic.quality.enabled': true, // 音质优选总开关: 按优先级主动选最优可用音质(非失败降级); 关闭则 stream 仅单次解析
   'subsonic.quality.priority': 'flac,320k,128k', // 音质优先级(从高到低, 逗号分隔), 按此顺序主动优选
-  'subsonic.source.priority': 'kw,tx,wy,mg,kg', // 跨平台优选顺序(逗号分隔, 客户端所选源始终优先)
+  'subsonic.source.priority': 'kw,tx,wy,mg,kg,qs', // 跨平台优选顺序(逗号分隔, 客户端所选源始终优先)
   'subsonic.source.crossPlatform': true, // 是否允许跨平台优选(按歌名+歌手在其它平台搜索替身)
   'subsonic.source.autoSwitchCustom': true, // 同源是否切换其它自定义源脚本(callUserApiGetMusicUrl 内部循环同平台候选脚本)
   'subsonic.transcode.enabled': false, // 服务端转码总开关(需安装 ffmpeg);音源无客户端请求音质或格式不符时,降码率/转容器转发以省客户端流量

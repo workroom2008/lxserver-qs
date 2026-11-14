@@ -574,7 +574,7 @@ if (envParams.SUBSONIC_PUBLIC_LEADERBOARDS !== undefined) {
 }
 if (envParams.SUBSONIC_LEADERBOARD_SOURCE) {
   const src = envParams.SUBSONIC_LEADERBOARD_SOURCE.trim().toLowerCase()
-  if (['tx', 'wy', 'kg', 'kw', 'mg'].includes(src)) {
+  if (['tx', 'wy', 'kg', 'kw', 'mg', 'qs'].includes(src)) {
     global.lx.config['subsonic.leaderboardSource'] = src
   }
 }

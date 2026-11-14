@@ -992,7 +992,7 @@ const getAudioRemoteSize = async (audioUrl: string): Promise<number | null> => {
   return null
 }
 
-const AUTO_SOURCE_ORDER = ['wy', 'tx', 'kw', 'kg', 'mg']
+const AUTO_SOURCE_ORDER = ['wy', 'tx', 'kw', 'kg', 'mg', 'qs']
 const SOURCE_MATCH_CACHE_TTL = 60_000
 const sourceMatchCache = new Map<string, { expiresAt: number, promise: Promise<any[]> }>()
 
@@ -7861,7 +7861,7 @@ const handleStartServer = async (port = 9527, ip = '0.0.0.0') => await new Promi
               if (newConfig['subsonic.publicLeaderboards'] !== undefined) global.lx.config['subsonic.publicLeaderboards'] = newConfig['subsonic.publicLeaderboards']
               if (newConfig['subsonic.leaderboardSource'] !== undefined) {
                 const s = String(newConfig['subsonic.leaderboardSource']).trim().toLowerCase()
-                if (['tx', 'wy', 'kg', 'kw', 'mg'].includes(s)) global.lx.config['subsonic.leaderboardSource'] = s
+                if (['tx', 'wy', 'kg', 'kw', 'mg', 'qs'].includes(s)) global.lx.config['subsonic.leaderboardSource'] = s
               }
               if (newConfig['subsonic.sharedListMode'] !== undefined) {
                 const m = String(newConfig['subsonic.sharedListMode']).trim().toLowerCase()
