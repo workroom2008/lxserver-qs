@@ -519,6 +519,14 @@ const validateReturnedMusicUrl = (rawUrl: any, sourceName?: string): string => {
     return trimmed
 }
 
+// 音质钳制：qs（汽水）无 hires 档（聆澜脚本 MUSIC_QUALITY.qs 上限 flac），
+// APP 全局音质档含 hires，缓存/下载路径会原样透传导致脚本上游报错——
+// 在真实取链入口单点钳制（/api/music/url 与 Subsonic 解析均经此函数）。
+export function normalizeQualityForSource(source: string, quality: string): string {
+    if (source === 'qs' && quality === 'hires') return 'flac'
+    return quality
+}
+
 // 调用自定义源的 getMusicUrl
 export async function callUserApiGetMusicUrl(
     source: string,
@@ -529,6 +537,8 @@ export async function callUserApiGetMusicUrl(
     enableAutoSwitchApiSource?: boolean,
     excludeApiSources?: string[]
 ): Promise<{ url: string, type: string, sourceName?: string, sourceId?: string, attempts?: any[], hasMoreSources?: boolean }> {
+    // qs 无 hires 档：在取链入口单点钳制，覆盖缓存/下载/播放/Subsonic 全部路径
+    quality = normalizeQualityForSource(source, quality)
     // 标准化 songInfo 格式：将 meta 中的字段提升到顶层
     const normalizedSongInfo = { ...songInfo }
     if (songInfo.meta) {
