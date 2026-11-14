@@ -32,7 +32,8 @@ test('getList: 标签映射为关键词搜索歌单，条目形状对齐 APP', a
   setFetcher(fetcherFor(urls, { search: searchBody }))
   const result = await songList.getList('hot', 'qs_tag_rege', 1)
 
-  assert.equal(urls.length, 1)
+  // 每个服务端页合并 3 个上游页
+  assert.equal(urls.length, 3)
   assert.match(urls[0], /\/luna\/search\/playlist\?/)
   assert.match(urls[0], /q=%E7%83%AD%E6%AD%8C/) // 热歌
   assert.equal(result.source, 'qs')
@@ -43,6 +44,41 @@ test('getList: 标签映射为关键词搜索歌单，条目形状对齐 APP', a
   assert.match(first.name, /抖音流行热歌/)
   assert.equal(first.total, 471)
   assert.equal(first.author, '菊离')
+})
+
+test('getList: 服务端每页合并 3 个上游页（60 个歌单），翻页 cursor 递进', async () => {
+  clearCache()
+  const urls: string[] = []
+  let calls = 0
+  setFetcher((url: string) => {
+    urls.push(url)
+    const cursor = Number(new URLSearchParams(url.split('?')[1]).get('cursor') || 0)
+    calls++
+    // 每个上游页生成 20 个唯一歌单（id = 9000 + cursor + 序号）
+    const data = {
+      result_groups: [{
+        id: 'playlists',
+        has_more: cursor < 100, // cursor 100 之后视为没有更多
+        data: Array.from({ length: 20 }, (_, i) => ({
+          entity: { playlist: { id: String(9000000 + cursor + i), title: `歌单${cursor + i}`, count_tracks: 30, owner: { nickname: '测试' } } },
+        })),
+      }],
+    }
+    return { promise: Promise.resolve({ statusCode: 200, body: data }) }
+  })
+  void calls
+  const result = await songList.getList('hot', 'qs_tag_rege', 1)
+
+  assert.equal(result.list.length, 60, `应合并 3 个上游页共 60 个歌单，实际 ${result.list.length}`)
+  assert.equal(result.limit, 60)
+  assert.equal(result.list[0].id, '9000000')
+  assert.ok(result.total >= 60)
+  // 翻页：第 2 页应从 cursor=60 开始
+  urls.length = 0
+  const page2 = await songList.getList('hot', 'qs_tag_rege', 2)
+  assert.match(urls[0], /cursor=60/)
+  assert.equal(page2.list.length, 60)
+  assert.equal(page2.list[0].id, '9000060')
 })
 
 test('search: 文本直接搜歌单，同形状', async () => {

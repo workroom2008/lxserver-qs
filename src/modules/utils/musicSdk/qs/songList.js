@@ -62,20 +62,37 @@ const mapPlaylist = (pl) => ({
   source: 'qs',
 })
 
+// 服务端每页合并 3 个上游页（上游 20 条/页 → 60 个歌单/页），减少客户端翻页次数
+const UPSTREAM_PAGES = 3
+const LIST_PAGE_SIZE = 20 * UPSTREAM_PAGES
+
 const searchPlaylists = async (word, page) => {
-  const url = `${PC_API_BASE}/luna/search/playlist?${buildQuery({
-    q: word,
-    cursor: (page - 1) * PAGE_SIZE,
-    search_method: 'input',
-  })}`
-  const data = await fetchJson(doFetch, url, `汽水歌单搜索失败(${word})`)
-  const group = data?.result_groups?.[0]
-  if (!group) throw new Error(`汽水歌单搜索失败(${word}): 响应缺少 result_groups`)
-  const list = (group.data || [])
-    .filter((item) => item?.entity?.playlist?.id)
-    .map((item) => mapPlaylist(item.entity.playlist))
-  const total = (page - 1) * PAGE_SIZE + list.length + (group.has_more ? PAGE_SIZE : 0)
-  return { list, total, allPage: Math.ceil(total / PAGE_SIZE), limit: PAGE_SIZE }
+  const list = []
+  const seen = new Set()
+  let hasMore = false
+  for (let up = 0; up < UPSTREAM_PAGES; up++) {
+    const cursor = (page - 1) * LIST_PAGE_SIZE + up * PAGE_SIZE
+    const url = `${PC_API_BASE}/luna/search/playlist?${buildQuery({
+      q: word,
+      cursor,
+      search_method: 'input',
+    })}`
+    const data = await fetchJson(doFetch, url, `汽水歌单搜索失败(${word})`)
+    const group = data?.result_groups?.[0]
+    if (!group) break
+    for (const item of group.data || []) {
+      const pl = item?.entity?.playlist
+      if (!pl?.id) continue
+      const idStr = String(pl.id)
+      if (seen.has(idStr)) continue
+      seen.add(idStr)
+      list.push(mapPlaylist(pl))
+    }
+    hasMore = group.has_more !== false
+    if (group.has_more === false) break
+  }
+  const total = (page - 1) * LIST_PAGE_SIZE + list.length + (hasMore ? LIST_PAGE_SIZE : 0)
+  return { list, total, allPage: Math.ceil(total / LIST_PAGE_SIZE), limit: LIST_PAGE_SIZE }
 }
 
 const fetchDetailTracks = async (id) => {
