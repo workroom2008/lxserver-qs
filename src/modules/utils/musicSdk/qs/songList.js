@@ -169,6 +169,7 @@ export const songList = {
     return {
       list: cached.list.slice(start, start + PAGE_SIZE),
       total: cached.total,
+      info: cached.info,
       allPage: Math.max(1, Math.ceil(cached.total / PAGE_SIZE)),
       limit: PAGE_SIZE,
       page,
