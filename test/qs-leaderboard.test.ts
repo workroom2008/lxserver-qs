@@ -53,7 +53,7 @@ test('getList: page>1 返回空列表不发起请求', async () => {
   assert.equal(result.page, 2)
 })
 
-test('getList: 主机失败回退 beta-luna 主机', async () => {
+test('getList: 主机失败重试后回退 beta-luna 主机', async () => {
   clearCache()
   const urls: string[] = []
   setFetcher((url: string) => {
@@ -64,9 +64,11 @@ test('getList: 主机失败回退 beta-luna 主机', async () => {
     return { promise: Promise.resolve({ statusCode: 200, body: JSON.parse(JSON.stringify(fixtureBody)) }) }
   })
   const result = await leaderboard.getList('7036274230471712007', 1)
-  assert.equal(urls.length, 2)
+  // fetchJson 对主机 1 重试 1 次（共 2 次），失败后回退主机 2
+  assert.equal(urls.length, 3)
   assert.match(urls[0], /api\.qishui\.com/)
-  assert.match(urls[1], /beta-luna\.douyin\.com/)
+  assert.match(urls[1], /api\.qishui\.com/)
+  assert.match(urls[2], /beta-luna\.douyin\.com/)
   assert.equal(result.list.length, 50)
 })
 

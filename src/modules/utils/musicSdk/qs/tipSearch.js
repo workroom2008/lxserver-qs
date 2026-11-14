@@ -2,7 +2,7 @@
 // 服务端 /api/music/tipSearch 契约：tipSearch.search(name) → 字符串数组（缺模块时路由返回 []）。
 import { randomUUID } from 'node:crypto'
 import { httpFetch } from '../../request'
-import { PC_API_BASE, buildQuery } from './utils'
+import { PC_API_BASE, buildQuery, fetchJson } from './utils'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
 
@@ -16,7 +16,6 @@ const cache = new Map()
 // 测试隔离用；生产侧无调用方。
 export const clearCache = () => cache.clear()
 
-const parseBody = (body) => (typeof body === 'string' ? JSON.parse(body) : body)
 
 export const tipSearch = {
   async search(str) {
@@ -32,13 +31,7 @@ export const tipSearch = {
       sug_scene: 'main',
       sug_search_id: randomUUID(),
     })}`
-    let data
-    try {
-      const response = await doFetch(url).promise
-      data = parseBody(response?.body)
-    } catch (err) {
-      throw new Error(`汽水联想失败: ${err?.message ?? String(err)}`)
-    }
+    const data = await fetchJson(doFetch, url, '汽水联想失败')
 
     const tips = (data?.sugs || [])
       .map((item) => item?.suggestion)

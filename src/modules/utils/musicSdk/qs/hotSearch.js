@@ -2,7 +2,7 @@
 // 该匿名端点固定返回 6 条（实测 count/page/limit 及其他 suggest_type 均无效），
 // 不足 20 条时用热歌榜歌名补位充当"推荐搜索词"（榜单端点同样匿名可用，真实曲目）。
 import { httpFetch } from '../../request'
-import { PC_API_BASE, buildQuery } from './utils'
+import { PC_API_BASE, buildQuery, fetchJson } from './utils'
 import { leaderboard } from './leaderboard'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
@@ -21,17 +21,10 @@ export const clearCache = () => {
   cache = { value: null, time: 0 }
 }
 
-const parseBody = (body) => (typeof body === 'string' ? JSON.parse(body) : body)
 
 const fetchHotWords = async () => {
   const url = `${PC_API_BASE}/luna/suggest-words/hot?${buildQuery()}`
-  let data
-  try {
-    const response = await doFetch(url).promise
-    data = parseBody(response?.body)
-  } catch (err) {
-    throw new Error(`汽水热搜失败: ${err?.message ?? String(err)}`)
-  }
+  const data = await fetchJson(doFetch, url, '汽水热搜失败')
   const words = (data?.suggest_words || [])
     .map((item) => item?.keyword)
     .filter((k) => typeof k === 'string' && k)

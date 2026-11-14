@@ -4,7 +4,7 @@
 //   上游实测一次返回全量曲目（fixture 471 条 + next_cursor），故整单缓存后按页切片；
 //   若上游未来截断，可基于已存的 next_cursor 扩展 cursor 链。
 import { httpFetch } from '../../request'
-import { PC_API_BASE, buildQuery, buildImageUrl, mapTrack } from './utils'
+import { PC_API_BASE, buildQuery, buildImageUrl, mapTrack, fetchJson } from './utils'
 
 const PAGE_SIZE = 20
 const CACHE_TTL_MS = 5 * 60 * 1000
@@ -50,7 +50,6 @@ const cacheSet = (key, value, maxSize = 100) => {
 // 测试隔离用；生产侧无调用方。
 export const clearCache = () => cache.clear()
 
-const parseBody = (body) => (typeof body === 'string' ? JSON.parse(body) : body)
 
 const mapPlaylist = (pl) => ({
   id: pl.id != null ? String(pl.id) : '',
@@ -69,13 +68,7 @@ const searchPlaylists = async (word, page) => {
     cursor: (page - 1) * PAGE_SIZE,
     search_method: 'input',
   })}`
-  let data
-  try {
-    const response = await doFetch(url).promise
-    data = parseBody(response?.body)
-  } catch (err) {
-    throw new Error(`汽水歌单搜索失败(${word}): ${err?.message ?? String(err)}`)
-  }
+  const data = await fetchJson(doFetch, url, `汽水歌单搜索失败(${word})`)
   const group = data?.result_groups?.[0]
   if (!group) throw new Error(`汽水歌单搜索失败(${word}): 响应缺少 result_groups`)
   const list = (group.data || [])
@@ -87,13 +80,7 @@ const searchPlaylists = async (word, page) => {
 
 const fetchDetailTracks = async (id) => {
   const url = `${PC_API_BASE}/luna/playlist/detail?${buildQuery({ playlist_id: id })}`
-  let data
-  try {
-    const response = await doFetch(url).promise
-    data = parseBody(response?.body)
-  } catch (err) {
-    throw new Error(`汽水歌单失败(${id}): ${err?.message ?? String(err)}`)
-  }
+  const data = await fetchJson(doFetch, url, `汽水歌单失败(${id})`)
   const tracks = (data?.media_resources || [])
     .filter((item) => {
       const t = item?.entity?.track_wrapper?.track ?? item?.entity?.track

@@ -1,7 +1,7 @@
 // 汽水音乐排行榜：GET /luna/pc/charts/{id}?charge=0（免登录，2026-11-14 实测）。
 // 单榜 50 首一次拿全；主机失败回退 beta-luna.douyin.com/luna/charts/{id}?charge=0。
 import { httpFetch } from '../../request'
-import { PC_API_BASE, BETA_LUNA_BASE, buildQuery, mapTrack } from './utils'
+import { PC_API_BASE, BETA_LUNA_BASE, buildQuery, mapTrack, fetchJson } from './utils'
 
 const CACHE_TTL_MS = 5 * 60 * 1000
 const LIST_DETAIL_LIMIT = 50
@@ -35,7 +35,6 @@ const cacheSet = (key, value) => cache.set(key, { value, time: Date.now() })
 // 测试隔离用；生产侧无调用方。
 export const clearCache = () => cache.clear()
 
-const parseBody = (body) => (typeof body === 'string' ? JSON.parse(body) : body)
 
 const fetchChart = async (bangid) => {
   const primaryUrl = `${PC_API_BASE}/luna/pc/charts/${bangid}?charge=0&${buildQuery()}`
@@ -44,8 +43,7 @@ const fetchChart = async (bangid) => {
   let lastErr = null
   for (const url of [primaryUrl, fallbackUrl]) {
     try {
-      const response = await doFetch(url).promise
-      const parsed = parseBody(response?.body)
+      const parsed = await fetchJson(doFetch, url, `汽水榜单失败(${bangid})`, 1)
       if (parsed?.chart) {
         data = parsed
         break

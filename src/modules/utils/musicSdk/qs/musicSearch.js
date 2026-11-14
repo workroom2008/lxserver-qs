@@ -1,7 +1,7 @@
 // 汽水音乐搜索：GET /luna/search/track（免登录免签名，2026-11-14 实测）。
 // 上游单页固定 20 条、cursor 偏移分页；limit≠20 时仅在映射后截断。
 import { httpFetch } from '../../request'
-import { PC_API_BASE, buildQuery, mapTrack } from './utils'
+import { PC_API_BASE, buildQuery, mapTrack, fetchJson } from './utils'
 
 const PAGE_SIZE = 20
 const CACHE_TTL_MS = 5 * 60 * 1000
@@ -32,7 +32,6 @@ const cacheSet = (key, value) => {
   cache.set(key, { value, time: Date.now() })
 }
 
-const parseBody = (body) => (typeof body === 'string' ? JSON.parse(body) : body)
 
 export const musicSearch = {
   limit: PAGE_SIZE,
@@ -51,13 +50,7 @@ export const musicSearch = {
         search_method: 'input',
       })}`
 
-      let data
-      try {
-        const response = await doFetch(url).promise
-        data = parseBody(response?.body)
-      } catch (err) {
-        throw new Error(`汽水搜索失败: ${err?.message ?? String(err)}`)
-      }
+      const data = await fetchJson(doFetch, url, '汽水搜索失败')
 
       const group = data?.result_groups?.[0]
       if (!group) throw new Error('汽水搜索失败: 响应缺少 result_groups')

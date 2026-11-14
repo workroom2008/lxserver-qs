@@ -36,6 +36,31 @@ export const buildImageUrl = (urlCover, size = '500:500') => {
 
 const DEFAULT_TYPES = [{ type: '128k' }, { type: '320k' }, { type: 'flac' }]
 
+// 统一的"取数 + 解析"：汽水匿名端点偶发返回空 body/坏 JSON（软限流，2026-11-14 容器内实测复现），
+// 统一自动重试，重试耗尽后抛出带业务上下文的错误。
+// doFetch: (url) => { promise }; label: 错误信息业务前缀。
+export const fetchJson = async (doFetch, url, label, retries = 2) => {
+  let lastErr = null
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (attempt > 0) {
+      await new Promise((resolve) => setTimeout(resolve, 400 * attempt))
+    }
+    try {
+      const response = await doFetch(url).promise
+      const body = response?.body
+      if (body == null || (typeof body === 'string' && !body.trim())) {
+        lastErr = new Error('上游返回空响应')
+        continue
+      }
+      if (typeof body !== 'string') return body
+      return JSON.parse(body)
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw new Error(`${label}: ${lastErr?.message ?? String(lastErr)}`)
+}
+
 // 汽水 track → lx 歌目形状（与 kg/musicSearch.js filterData 同形）。
 // 音质档固定 128k/320k/flac：与聆澜脚本 MUSIC_QUALITY.qs 对齐，取链走脚本。
 export const mapTrack = (track) => {
