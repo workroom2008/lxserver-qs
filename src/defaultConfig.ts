@@ -127,6 +127,7 @@ const config: LX.Config = {
   'subsonic.quality.enabled': true, // 音质优选总开关: 按优先级主动选最优可用音质(非失败降级); 关闭则 stream 仅单次解析
   'subsonic.quality.priority': 'flac,320k,128k', // 音质优先级(从高到低, 逗号分隔), 按此顺序主动优选
   'subsonic.source.priority': 'kw,tx,wy,mg,kg,qs', // 跨平台优选顺序(逗号分隔, 客户端所选源始终优先)
+  'source.qs.maxQuality': '320k', // 汽水取链最高音质(上游 flac 资源多为加密/VIP, 默认 320k; 上游修复后可改 flac)
   'subsonic.source.crossPlatform': true, // 是否允许跨平台优选(按歌名+歌手在其它平台搜索替身)
   'subsonic.source.autoSwitchCustom': true, // 同源是否切换其它自定义源脚本(callUserApiGetMusicUrl 内部循环同平台候选脚本)
   'subsonic.transcode.enabled': false, // 服务端转码总开关(需安装 ffmpeg);音源无客户端请求音质或格式不符时,降码率/转容器转发以省客户端流量

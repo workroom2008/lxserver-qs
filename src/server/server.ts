@@ -7852,6 +7852,10 @@ const handleStartServer = async (port = 9527, ip = '0.0.0.0') => await new Promi
                 configBackupChanged = true
               }
               if (configBackupChanged) global.lx.rescheduleConfigBackup?.()
+              if (newConfig['source.qs.maxQuality'] !== undefined) {
+                const qsMax = String(newConfig['source.qs.maxQuality']).trim()
+                global.lx.config['source.qs.maxQuality'] = ['128k', '320k', 'flac'].includes(qsMax) ? qsMax : '320k'
+              }
               if (newConfig['subsonic.onlineSearch'] !== undefined) global.lx.config['subsonic.onlineSearch'] = newConfig['subsonic.onlineSearch']
               if (newConfig['subsonic.onlineSearchMode'] !== undefined) global.lx.config['subsonic.onlineSearchMode'] = newConfig['subsonic.onlineSearchMode']
               if (newConfig['subsonic.onlineSearchSources'] !== undefined) global.lx.config['subsonic.onlineSearchSources'] = newConfig['subsonic.onlineSearchSources']

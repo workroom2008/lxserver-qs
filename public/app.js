@@ -3671,6 +3671,9 @@ class App {
             if (form.elements['subsonic.publicLeaderboards']) {
                 form.elements['subsonic.publicLeaderboards'].checked = config['subsonic.publicLeaderboards'] === true;
             }
+            if (form.elements['source.qs.maxQuality']) {
+                form.elements['source.qs.maxQuality'].value = config['source.qs.maxQuality'] || '320k';
+            }
             if (form.elements['subsonic.leaderboardSource']) {
                 const lbSource = config['subsonic.leaderboardSource'] || 'tx';
                 form.elements['subsonic.leaderboardSource'].value = lbSource;
@@ -3744,7 +3747,7 @@ class App {
             }
 
             if (form.elements['subsonic.source.priority']) {
-                const sVal = config['subsonic.source.priority'] || 'kw,tx,wy,mg,kg';
+                const sVal = config['subsonic.source.priority'] || 'kw,tx,wy,mg,kg,qs';
                 form.elements['subsonic.source.priority'].value = sVal;
                 this.updateSourcePriorityTagUI(sVal);
             }
@@ -3784,6 +3787,7 @@ class App {
             'subsonic.cachePlaylist': formData.get('subsonic.cachePlaylist') === 'on',
             'subsonic.publicLeaderboards': formData.get('subsonic.publicLeaderboards') === 'on',
             'subsonic.leaderboardSource': (formData.get('subsonic.leaderboardSource') || '').trim() || 'tx',
+            'source.qs.maxQuality': (formData.get('source.qs.maxQuality') || '320k').trim(),
             'subsonic.sharedListMode': (formData.get('subsonic.sharedListMode') || '').trim() || 'leaderboard',
             'subsonic.sharedListSort': (formData.get('subsonic.sharedListSort') || '').trim() || 'hot',
             'subsonic.lyricTranslation': formData.get('subsonic.lyricTranslation') === 'on',

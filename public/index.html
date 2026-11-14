@@ -1777,8 +1777,19 @@
                                     <label class="config-label">跨平台源优选顺序 <button type="button" class="help-icon"
                                             aria-label="查看帮助说明" onclick="app.toggleHelp(this)"
                                             data-help="拖拽可调整优先顺序；点击 ✕ 可停用/置底变灰（客户端所选源始终最优先）">?</button></label>
-                                    <input type="hidden" name="subsonic.source.priority" value="kw,tx,wy,mg,kg" />
+                                    <input type="hidden" name="subsonic.source.priority" value="kw,tx,wy,mg,kg,qs" />
                                     <div class="tag-sortable-group" id="tag-group-source-priority"></div>
+                                </div>
+                                <div class="config-field">
+                                    <label class="config-label">汽水音质上限 <button type="button" class="help-icon"
+                                            aria-label="查看帮助说明" onclick="app.toggleHelp(this)"
+                                            data-help="汽水(qs)取链允许的最高音质，影响 Web/APP/缓存/下载/Subsonic 全部取链。上游 flac 资源多为加密/VIP 不可播，默认 320k；上游修复后改为 flac 即恢复无损。">?</button></label>
+                                    <select name="source.qs.maxQuality"
+                                        class="form-input config-input !w-auto">
+                                        <option value="320k">320k 高品（默认，上游 flac 不可播）</option>
+                                        <option value="128k">128k 标准</option>
+                                        <option value="flac">无损 flac（上游修复后再选）</option>
+                                    </select>
                                 </div>
                                 <div class="config-toggle-grid">
                                     <div class="config-toggle-row">

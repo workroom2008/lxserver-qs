@@ -519,12 +519,21 @@ const validateReturnedMusicUrl = (rawUrl: any, sourceName?: string): string => {
     return trimmed
 }
 
-// 音质钳制：qs（汽水）无 hires 档（聆澜脚本 MUSIC_QUALITY.qs 上限 flac），
-// APP 全局音质档含 hires，缓存/下载路径会原样透传导致脚本上游报错——
+// 音质钳制：qs（汽水）按配置上限钳制（默认 320k——上游 flac 资源多为加密/VIP 不可播，
+// 经音源提供商确认；上游修复后在后台把 source.qs.maxQuality 改回 flac 即可）。
+// APP 全局音质档含 hires/flac，缓存/下载路径会原样透传导致脚本上游报错——
 // 在真实取链入口单点钳制（/api/music/url 与 Subsonic 解析均经此函数）。
-export function normalizeQualityForSource(source: string, quality: string): string {
-    if (source === 'qs' && quality === 'hires') return 'flac'
-    return quality
+const QS_QUALITY_RANKS: Record<string, number> = {
+    '32k': 1, '64k': 2, '128k': 3, '192k': 4, '256k': 5, '320k': 6,
+    flac: 7, flac24bit: 8, hires: 9, atmos: 10, atmos_plus: 11, master: 12,
+}
+
+export function normalizeQualityForSource(source: string, quality: string, maxQuality?: string): string {
+    if (source !== 'qs') return quality
+    const max = maxQuality && QS_QUALITY_RANKS[maxQuality] ? maxQuality : '320k'
+    const requested = QS_QUALITY_RANKS[quality]
+    if (!requested) return quality
+    return requested > QS_QUALITY_RANKS[max] ? max : quality
 }
 
 // 调用自定义源的 getMusicUrl
@@ -537,8 +546,8 @@ export async function callUserApiGetMusicUrl(
     enableAutoSwitchApiSource?: boolean,
     excludeApiSources?: string[]
 ): Promise<{ url: string, type: string, sourceName?: string, sourceId?: string, attempts?: any[], hasMoreSources?: boolean }> {
-    // qs 无 hires 档：在取链入口单点钳制，覆盖缓存/下载/播放/Subsonic 全部路径
-    quality = normalizeQualityForSource(source, quality)
+    // qs 音质上限可配置（默认 320k）：在取链入口单点钳制，覆盖缓存/下载/播放/Subsonic 全部路径
+    quality = normalizeQualityForSource(source, quality, global.lx.config['source.qs.maxQuality'])
     // 标准化 songInfo 格式：将 meta 中的字段提升到顶层
     const normalizedSongInfo = { ...songInfo }
     if (songInfo.meta) {

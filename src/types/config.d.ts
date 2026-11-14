@@ -518,6 +518,7 @@ declare namespace LX {
      * 跨平台优选顺序(逗号分隔), 默认 'kw,tx,wy,mg,kg'。客户端所选源始终优先, 其余按此顺序优选。
      */
     'subsonic.source.priority'?: string
+    'source.qs.maxQuality'?: string
 
     /**
      * 是否允许跨平台优选 (默认 true)。关闭则只在客户端所选源内做音质优选。
