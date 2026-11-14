@@ -3654,7 +3654,7 @@ class App {
                 form.elements['subsonic.onlineSearchMode'].value = config['subsonic.onlineSearchMode'] || 'fallback';
             }
             if (form.elements['subsonic.onlineSearchSources']) {
-                const searchSources = config['subsonic.onlineSearchSources'] || 'wy,tx,kw,kg,mg';
+                const searchSources = config['subsonic.onlineSearchSources'] || 'wy,tx,kw,kg,mg,qs';
                 form.elements['subsonic.onlineSearchSources'].value = searchSources;
                 this.updateSearchSourcesTagUI(searchSources);
             }
@@ -3781,7 +3781,7 @@ class App {
             'subsonic.port': parseInt(formData.get('subsonic.port')) || 0,
             'subsonic.onlineSearch': formData.get('subsonic.onlineSearch') === 'on',
             'subsonic.onlineSearchMode': formData.get('subsonic.onlineSearchMode') || 'fallback',
-            'subsonic.onlineSearchSources': (formData.get('subsonic.onlineSearchSources') || '').trim() || 'wy,tx,kw,kg,mg',
+            'subsonic.onlineSearchSources': (formData.get('subsonic.onlineSearchSources') || '').trim() || 'wy,tx,kw,kg,mg,qs',
             'subsonic.localPlaylist': formData.get('subsonic.localPlaylist') === 'on',
             'subsonic.customPlaylist': formData.get('subsonic.customPlaylist') === 'on',
             'subsonic.cachePlaylist': formData.get('subsonic.cachePlaylist') === 'on',
