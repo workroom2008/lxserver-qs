@@ -8,6 +8,15 @@ export { setFetcher }
 
 const cache = new Map()
 const CACHE_TTL_MS = 10 * 60 * 1000
+const CACHE_MAX_ENTRIES = 100
+
+const cacheSet = (key, value) => {
+  if (cache.size >= CACHE_MAX_ENTRIES) {
+    const oldest = cache.keys().next().value
+    cache.delete(oldest)
+  }
+  cache.set(key, { value, time: Date.now() })
+}
 // 测试隔离用；生产侧无调用方。
 export const clearCache = () => cache.clear()
 
@@ -67,7 +76,7 @@ export const lyric = {
           rlyric: '',
           lxlyric: content,
         }
-        cache.set(key, { value: result, time: Date.now() })
+        cacheSet(key, result)
         return result
       })(),
     }

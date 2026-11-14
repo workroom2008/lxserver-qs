@@ -48,6 +48,29 @@ test('getLyric: 上游失败抛含上下文错误', async () => {
   await assert.rejects(() => lyric.getLyric({ songmid: '1' }).promise, /汽水歌词失败/)
 })
 
+test('getLyric: 缓存超过 100 条时淘汰最旧条目', async () => {
+  clearCache()
+  const karaoke = '[0,100]<0,50,0>词'
+  let calls = 0
+  setFetcher((u: string) => {
+    calls++
+    return {
+      promise: Promise.resolve({
+        statusCode: 200,
+        body: { lyric: { content: karaoke }, seo_track: { track: {} } },
+      }),
+    }
+  })
+  // 写入 1 首 + 100 首不同的歌，共 101 条 → 第 1 首被淘汰
+  await lyric.getLyric({ songmid: 'keep-me' }).promise
+  for (let i = 0; i < 100; i++) {
+    await lyric.getLyric({ songmid: `filler-${i}` }).promise
+  }
+  const callsBefore = calls
+  await lyric.getLyric({ songmid: 'keep-me' }).promise
+  assert.equal(calls, callsBefore + 1, 'keep-me 已被淘汰，应重新发起请求')
+})
+
 test('getPic: 从 seo_track 取封面', async () => {
   clearCache()
   setFetcher((u: string) => ({ promise: Promise.resolve({ statusCode: 200, body: JSON.parse(JSON.stringify(seoBody)) }) }))

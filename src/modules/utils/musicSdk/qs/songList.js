@@ -124,8 +124,9 @@ export const songList = {
   },
 
   async getList(sortId, tagId, page) {
+    // 空标签（APP 歌单页首屏 _tagId 默认 ''）回退默认标签，避免向上游发空关键词
     const tag = TAGS.find((t) => t.id === tagId)
-    const word = tag ? tag.name : String(tagId ?? '')
+    const word = (tag ?? (tagId ? { name: String(tagId) } : null))?.name || TAGS[0].name
     const key = `pl-list:${word}:${page}`
     let cached = cacheGet(key)
     if (!cached) {

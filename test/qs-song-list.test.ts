@@ -84,6 +84,15 @@ test('getListDetail: 末页切片（471 条 → 第 24 页 11 条），不重复
   assert.equal(page24.page, 24)
 })
 
+test('getList: 空 tagId 回退默认标签（热歌），不发空关键词', async () => {
+  clearCache()
+  const urls: string[] = []
+  setFetcher(fetcherFor(urls, { search: searchBody }))
+  const result = await songList.getList('hot', '', 1)
+  assert.match(urls[0], /q=%E7%83%AD%E6%AD%8C/) // 热歌
+  assert.ok(result.list.length > 0)
+})
+
 test('getListDetail: 未知 id 且上游失败，抛含上下文错误', async () => {
   clearCache()
   setFetcher(() => ({ promise: Promise.reject(new Error('net down')) }))
