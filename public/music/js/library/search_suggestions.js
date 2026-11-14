@@ -1,5 +1,5 @@
 (function () {
-    const SOURCES = ['kw', 'kg', 'tx', 'wy', 'mg'];
+    const SOURCES = ['kw', 'kg', 'tx', 'wy', 'mg', 'qs'];
     const normalize = text => text.normalize('NFKC').trim().toLowerCase().replace(/\s*[-–—]\s*/g, ' - ').replace(/\s+/g, ' ');
     function merge(groups, query, limit = 10) {
         const words = new Map(), keyword = normalize(query);

@@ -1527,7 +1527,7 @@ class DownloadManager {
     renderTaskHtml(task) {
         const coverSrc = this.getSongCover(task.song);
         const sourceName = {
-            'wy': '网易', 'tx': 'QQ', 'kg': '酷狗', 'kw': '酷我', 'mg': '咪咕'
+            'wy': '网易', 'tx': 'QQ', 'kg': '酷狗', 'kw': '酷我', 'mg': '咪咕', 'qs': '汽水'
         }[task.song.source] || task.song.source;
 
         let qualityLabel = task.quality || window.settings?.preferredQuality || '优先最高';

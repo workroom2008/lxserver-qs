@@ -2429,7 +2429,7 @@ function performSearch(query, source = null) {
 
     // 如果指定了源且属于支持的源，则更新选择框
     const sourceEl = document.getElementById('search-source');
-    const validSources = ['kw', 'kg', 'tx', 'wy', 'mg'];
+    const validSources = ['kw', 'kg', 'tx', 'wy', 'mg', 'qs'];
     if (source && sourceEl && validSources.includes(source)) {
         sourceEl.value = source;
     }
@@ -2474,7 +2474,7 @@ function handleSearchTypeChange() {
 }
 window.handleSearchTypeChange = handleSearchTypeChange;
 
-const SOURCES = ['kw', 'kg', 'tx', 'wy', 'mg'];
+const SOURCES = ['kw', 'kg', 'tx', 'wy', 'mg', 'qs'];
 
 function isPagedNetworkResult(list) {
     const detailVisible = ['artist-detail-header', 'album-detail-header'].some(id => {
@@ -2867,7 +2867,7 @@ function changePage(delta) {
 
 // ========== 热搜功能 ==========
 let hotSearchMultiCache = {};
-const HOT_SEARCH_SOURCES = ['wy', 'tx', 'kg', 'kw', 'mg'];
+const HOT_SEARCH_SOURCES = ['wy', 'tx', 'kg', 'kw', 'mg', 'qs'];
 const HOT_SEARCH_CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
 
 async function fetchHotSearch(source = 'all', force = false) {
@@ -2950,7 +2950,8 @@ function renderHotSearch(data) {
         { id: 'tx', name: 'QQ' },
         { id: 'kg', name: '酷狗' },
         { id: 'kw', name: '酷我' },
-        { id: 'mg', name: '咪咕' }
+        { id: 'mg', name: '咪咕' },
+        { id: 'qs', name: '汽水' }
     ];
 
     container.innerHTML = `
@@ -6131,7 +6132,7 @@ function timeToSeconds(timeStr) {
  * 辅助：获取源名称
  */
 function getSourceName(source) {
-    const names = { kw: '酷我', kg: '酷狗', tx: 'QQ', wy: '网易', mg: '咪咕' };
+    const names = { kw: '酷我', kg: '酷狗', tx: 'QQ', wy: '网易', mg: '咪咕', qs: '汽水' };
     return names[source] || source.toUpperCase();
 }
 
@@ -15217,7 +15218,8 @@ async function renderCustomSources() {
                     'kw': { name: '酷我', color: 't-badge-yellow' },
                     'tx': { name: 'QQ', color: 't-badge-green' },
                     'wy': { name: '网易', color: 't-badge-red' },
-                    'mg': { name: '咪咕', color: 't-badge-pink' }
+                    'mg': { name: '咪咕', color: 't-badge-pink' },
+                    'qs': { name: '汽水', color: 't-badge-cyan' }
                 };
 
                 supportedBadges = `<div class="flex flex-wrap gap-1 md:gap-1.5 mt-1.5 md:mt-2">
@@ -15815,6 +15817,7 @@ function openEditSourceModal(sourceId) {
         'tx': { name: 'QQ音乐', icon: 'fab fa-qq', color: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-900/30' },
         'wy': { name: '网易云音乐', icon: 'fas fa-cloud', color: 'text-red-500 bg-red-50 dark:bg-red-900/30' },
         'mg': { name: '咪咕音乐', icon: 'fas fa-headphones-alt', color: 'text-pink-500 bg-pink-50 dark:bg-pink-900/30' },
+        'qs': { name: '汽水音乐', icon: 'fas fa-music', color: 'text-cyan-500 bg-cyan-50 dark:bg-cyan-900/30' },
         'local': { name: '本地音乐', icon: 'fas fa-hdd', color: 'text-purple-500 bg-purple-50 dark:bg-purple-900/30' }
     };
 

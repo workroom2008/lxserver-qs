@@ -251,7 +251,7 @@ window.SongListManager = (function () {
 
         try {
             if (source === 'all') {
-                const sources = ['wy', 'tx', 'kg', 'kw', 'mg'];
+                const sources = ['wy', 'tx', 'kg', 'kw', 'mg', 'qs'];
                 const promises = sources.map(s =>
                     fetch(`${API_BASE}/songList/list?source=${s}&tagId=${encodeURIComponent(tagId)}&sortId=${encodeURIComponent(sortId || 'hot')}&page=${page}`)
                         .then(r => r.json())
@@ -587,7 +587,7 @@ window.SongListManager = (function () {
             if (miniCover) miniCover.src = coverUrl;
         }
 
-        const sourceNames = { kw: '酷我音乐', kg: '酷狗音乐', tx: 'QQ音乐', wy: '网易云音乐', mg: '咪咕音乐' };
+        const sourceNames = { kw: '酷我音乐', kg: '酷狗音乐', tx: 'QQ音乐', wy: '网易云音乐', mg: '咪咕音乐', qs: '汽水音乐' };
         const sourceLabel = sourceNames[detailState.source] || (detailState.source ? detailState.source.toUpperCase() : '歌单推荐');
         const sourceTag = document.getElementById('sl-detail-source-tag');
         if (sourceTag) sourceTag.textContent = sourceLabel;
@@ -977,7 +977,7 @@ window.SongListManager = (function () {
             if (pagination) pagination.classList.add('hidden');
 
             const source = currentState.source;
-            const sources = ['wy', 'tx', 'kg', 'kw', 'mg'];
+            const sources = ['wy', 'tx', 'kg', 'kw', 'mg', 'qs'];
             const sourceName = typeof getSourceName === 'function' ? getSourceName(source) : source;
 
             if (source === 'all') {
