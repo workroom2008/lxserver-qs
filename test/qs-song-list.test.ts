@@ -54,7 +54,7 @@ test('search: 文本直接搜歌单，同形状', async () => {
   assert.equal(result.list[0].id, '7200303206223773734')
 })
 
-test('getListDetail: 首页 20 条、total 471、首条 ID 字符串', async () => {
+test('getListDetail: 首页 20 条、total 471、首条 ID 字符串、info 歌单元数据', async () => {
   clearCache()
   const urls: string[] = []
   setFetcher(fetcherFor(urls, { detail: detailBody }))
@@ -69,6 +69,11 @@ test('getListDetail: 首页 20 条、total 471、首条 ID 字符串', async () 
   assert.equal(result.list[0].songmid, '7654496187366426641')
   assert.equal(typeof result.list[0].songmid, 'string')
   assert.equal(result.list[0].singer, '蒋雪儿Snow.J')
+  // Web 端 renderDetail 在 info 缺失时直接 return，详情页整页不渲染
+  assert.ok(result.info, '详情响应必须带 info')
+  assert.match(result.info.name, /抖音流行热歌/)
+  assert.match(result.info.img, /\.jpg$/)
+  assert.equal(result.info.author, '菊离')
 })
 
 test('getListDetail: 末页切片（471 条 → 第 24 页 11 条），不重复请求', async () => {

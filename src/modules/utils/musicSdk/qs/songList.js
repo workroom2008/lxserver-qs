@@ -104,9 +104,18 @@ const fetchDetailTracks = async (id) => {
       return mapTrack(t)
     })
   const count = data?.playlist?.count_tracks ?? tracks.length
+  const pl = data?.playlist || {}
   return {
     list: tracks,
     total: count,
+    // Web 端 renderDetail 依赖 info（缺失时整页不渲染），与 kg 详情响应同形
+    info: {
+      id: pl.id != null ? String(pl.id) : '',
+      name: pl.title ?? pl.public_title ?? '',
+      img: buildImageUrl(pl.url_cover),
+      desc: pl.desc ?? '',
+      author: pl.owner?.nickname ?? pl.owner?.name ?? '',
+    },
     // next_cursor 留档：上游若未来截断返回，可据此扩展 cursor 链。
     nextCursor: data?.next_cursor ?? null,
   }
