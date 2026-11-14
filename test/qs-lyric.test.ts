@@ -71,12 +71,12 @@ test('getLyric: 缓存超过 100 条时淘汰最旧条目', async () => {
   assert.equal(calls, callsBefore + 1, 'keep-me 已被淘汰，应重新发起请求')
 })
 
-test('getPic: 从 seo_track 取封面', async () => {
+test('getPic: 从 seo_track 取封面（无扩展名 uri 补 .jpg）', async () => {
   clearCache()
   setFetcher((u: string) => ({ promise: Promise.resolve({ statusCode: 200, body: JSON.parse(JSON.stringify(seoBody)) }) }))
   const url = await pic.getPic({ songmid: '7676337516358617115' })
   assert.equal(
     url,
-    'https://p3-luna.douyinpic.com/img/tos-cn-v-2774c002/oIAIAITAzvMIVFCeSAWEEgfGIeCGaCLtGqbBpj~tplv-b829550vbb-resize:500:500',
+    'https://p3-luna.douyinpic.com/img/tos-cn-v-2774c002/oIAIAITAzvMIVFCeSAWEEgfGIeCGaCLtGqbBpj~tplv-b829550vbb-resize:500:500.jpg',
   )
 })

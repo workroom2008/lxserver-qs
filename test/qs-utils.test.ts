@@ -48,7 +48,7 @@ test('buildImageUrl: urls[0]+uri+~template+resize+原扩展名', () => {
   )
 })
 
-test('buildImageUrl: 无扩展名 uri 不追加扩展名', () => {
+test('buildImageUrl: 无扩展名 uri 追加 .jpg（实测无后缀返回 400）', () => {
   const urlCover = {
     uri: 'tos-cn-v-2774c002/ok2qXyvVACAsAZvhgEFVFCQDFfVHe8AEBtBAUE',
     urls: ['https://p3-luna.douyinpic.com/img/'],
@@ -56,7 +56,7 @@ test('buildImageUrl: 无扩展名 uri 不追加扩展名', () => {
   }
   assert.equal(
     buildImageUrl(urlCover),
-    'https://p3-luna.douyinpic.com/img/tos-cn-v-2774c002/ok2qXyvVACAsAZvhgEFVFCQDFfVHe8AEBtBAUE~tplv-b829550vbb-resize:500:500',
+    'https://p3-luna.douyinpic.com/img/tos-cn-v-2774c002/ok2qXyvVACAsAZvhgEFVFCQDFfVHe8AEBtBAUE~tplv-b829550vbb-resize:500:500.jpg',
   )
 })
 

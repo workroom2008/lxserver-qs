@@ -19,7 +19,9 @@ export const buildQuery = (extra = {}) => {
 }
 
 // url_cover: { uri, urls: ['https://p3-luna.douyinpic.com/img/', ...], template_prefix }
-// 最终图 URL 形如 urls[0] + uri + '~' + template_prefix + '-resize:W:H' + uri 原扩展名（无扩展名则不追加）。
+// 最终图 URL 形如 urls[0] + uri + '~' + template_prefix + '-resize:W:H' + 扩展名。
+// 扩展名取 uri 自带的（.png/.jpg 等）；uri 无扩展名时必须补 .jpg——
+// 实测（2026-11-14）无格式后缀的模板 URL 返回 HTTP 400，补 .jpg 后返回 200 image/jpeg。
 export const buildImageUrl = (urlCover, size = '500:500') => {
   if (!urlCover || typeof urlCover !== 'object') return null
   const { uri, urls, template_prefix: templatePrefix } = urlCover
@@ -28,7 +30,7 @@ export const buildImageUrl = (urlCover, size = '500:500') => {
   if (typeof base !== 'string' || !base) return null
   const dotIndex = uri.lastIndexOf('.')
   const slashIndex = uri.lastIndexOf('/')
-  const ext = dotIndex > slashIndex ? uri.slice(dotIndex) : ''
+  const ext = dotIndex > slashIndex ? uri.slice(dotIndex) : '.jpg'
   return `${base}${uri}~${templatePrefix}-resize:${size}${ext}`
 }
 
