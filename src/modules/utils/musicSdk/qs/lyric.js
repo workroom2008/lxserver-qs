@@ -1,6 +1,8 @@
 // 汽水音乐歌词：GET /luna/h5/seo_track（免登录，2026-11-14 实测）。
 // lyric.content 为卡拉OK逐字串：`[行起始ms,行时长ms]<字offsetms,字时长ms,0>字…`，\n 分行。
-// 转换为 LRC（[mm:ss.xx] 行时间戳 = 行起始ms + 首字offset），原串作为 lxlyric 保留。
+// 转换为标准 LRC（[mm:ss.xx] 行时间戳 = 行起始ms + 首字offset）。
+// 注意：lxlyric 必须为空——lxserver Web 端 setLyric 优先吃 lxlyric（app.js:11079），
+// 而汽水逐字串是 LinePlayer 解析不了的变体，带上会导致歌词渲染为空。
 import { setFetcher, fetchSeoTrack } from './seoTrack'
 
 // setFetcher/clearCache 再导出：歌词与封面共用同一注入点，测试只注入一次。
@@ -74,7 +76,7 @@ export const lyric = {
           lyric: karaokeToLrc(content),
           tlyric: '',
           rlyric: '',
-          lxlyric: content,
+          lxlyric: '',
         }
         cacheSet(key, result)
         return result

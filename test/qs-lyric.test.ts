@@ -25,7 +25,7 @@ test('karaokeToLrc: 空内容抛错', () => {
   assert.throws(() => karaokeToLrc(''), /汽水歌词/)
 })
 
-test('getLyric: 返回 {lyric, tlyric, rlyric, lxlyric}，lxlyric 为原串', async () => {
+test('getLyric: 返回 {lyric, tlyric, rlyric, lxlyric}，lxlyric 必须为空', async () => {
   clearCache()
   let url = ''
   setFetcher((u: string) => {
@@ -37,7 +37,9 @@ test('getLyric: 返回 {lyric, tlyric, rlyric, lxlyric}，lxlyric 为原串', as
 
   assert.match(url, /\/luna\/h5\/seo_track\?track_id=7676337516358617115/)
   assert.match(result.lyric, /^\[00:14\.69\]故事的小黄花/)
-  assert.equal(result.lxlyric, seoBody.lyric.content)
+  // Web 端 LinePlayer 优先吃 lxlyric 且解析不了汽水卡拉OK变体（渲染为空），
+  // 因此响应绝不能带逐字串
+  assert.equal(result.lxlyric, '')
   assert.equal(result.tlyric, '')
   assert.equal(result.rlyric, '')
 })
