@@ -17,7 +17,13 @@ export const serveFile = (req: IncomingMessage, res: ServerResponse, filename: s
   let stat: fs.Stats
   try { stat = fs.statSync(filename) } catch { res.writeHead(404); res.end(); return }
   if (!stat.isFile()) { res.writeHead(404); res.end(); return }
-  const headers: Record<string, string | number> = { 'Content-Type': contentType, 'Accept-Ranges': 'bytes' }
+  const headers: Record<string, string | number> = {
+    'Content-Type': contentType,
+    'Accept-Ranges': 'bytes',
+    // 静态资源（前端 html/js/css）强制协商缓存：无此头浏览器启发式缓存会导致
+    // 发版后客户端一直跑旧脚本（“改了看不到”）。局域网带宽下重新拉取代价可忽略。
+    'Cache-Control': 'no-cache',
+  }
   // Range has no meaning for HEAD; report the full representation without opening it.
   const range = req.method !== 'HEAD' && req.headers.range ? parseByteRange(req.headers.range, stat.size) : undefined
   if (range === null) {
