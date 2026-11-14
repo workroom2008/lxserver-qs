@@ -4,6 +4,7 @@ import tx from './tx/index'
 import wy from './wy/index'
 import mg from './mg/index'
 import xm from './xm'
+import qs from './qs/index'
 import { supportQuality } from './api-source'
 import { versionChars } from './versionChars'
 export { dateFormat, dateFormat2, decodeName, sizeFormate, formatPlayTime, formatPlayCount } from '../index'
@@ -35,6 +36,10 @@ const sources = {
       name: '虾米音乐',
       id: 'xm',
     },
+    {
+      name: '汽水音乐',
+      id: 'qs',
+    },
     // [移除] 百度音乐(bd)：上游 ting 接口已失效（返回非 22000，重试 3 次后 try max num），
     // 而它唯一的调用点是「电台歌单枚举」，会导致每次拉电台列表都白等重试并刷 warn，故不再注册。
     // 注意：bd/musicInfo.js 仍保留，用于解析历史数据中 source='bd' 的歌曲元数据。
@@ -45,6 +50,7 @@ const sources = {
   wy,
   mg,
   xm,
+  qs,
 }
 export default {
   ...sources,
@@ -62,7 +68,7 @@ export default {
     const trimStr = str => typeof str == 'string' ? str.trim() : str
     const musicName = trimStr(name)
     const tasks = []
-    const excludeSource = ['xm']
+    const excludeSource = ['xm', 'qs']
     for (const source of sources.sources) {
       if (!sources[source.id].musicSearch || source.id == s || excludeSource.includes(source.id)) continue
       tasks.push(sources[source.id].musicSearch.search(`${musicName} ${singer || ''}`.trim(), page, limit).catch(err => {
