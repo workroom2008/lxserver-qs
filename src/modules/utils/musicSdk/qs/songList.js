@@ -152,14 +152,18 @@ export const songList = {
       cacheSet(key, cached, DETAIL_CACHE_MAX)
     }
 
-    const start = (page - 1) * PAGE_SIZE
+    // APP/Web 端详情只拉 page=1，其它源（kg limit 10000）一次返回全部——
+    // 按页切片会导致 APP 只显示 20 条，故对齐全量单页模式
+    if (page > 1) {
+      return { list: [], total: cached.total, info: cached.info, allPage: 1, limit: 10000, page, source: 'qs' }
+    }
     return {
-      list: cached.list.slice(start, start + PAGE_SIZE),
+      list: cached.list,
       total: cached.total,
       info: cached.info,
-      allPage: Math.max(1, Math.ceil(cached.total / PAGE_SIZE)),
-      limit: PAGE_SIZE,
-      page,
+      allPage: 1,
+      limit: 10000,
+      page: 1,
       source: 'qs',
     }
   },

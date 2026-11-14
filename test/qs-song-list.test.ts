@@ -54,7 +54,7 @@ test('search: 文本直接搜歌单，同形状', async () => {
   assert.equal(result.list[0].id, '7200303206223773734')
 })
 
-test('getListDetail: 首页 20 条、total 471、首条 ID 字符串、info 歌单元数据', async () => {
+test('getListDetail: 一次性返回全部曲目（对齐 kg limit 10000 模式）、info 歌单元数据', async () => {
   clearCache()
   const urls: string[] = []
   setFetcher(fetcherFor(urls, { detail: detailBody }))
@@ -65,28 +65,31 @@ test('getListDetail: 首页 20 条、total 471、首条 ID 字符串、info 歌�
   assert.match(urls[0], /playlist_id=7200303206223773734/)
   assert.equal(result.source, 'qs')
   assert.equal(result.total, 471)
-  assert.equal(result.list.length, 20)
+  // APP 端详情只拉 page=1，必须一次返回全部（kg 同款），否则只显示 20 条
+  assert.equal(result.list.length, 471)
+  assert.equal(result.limit, 10000)
+  assert.equal(result.allPage, 1)
   assert.equal(result.list[0].songmid, '7654496187366426641')
   assert.equal(typeof result.list[0].songmid, 'string')
   assert.equal(result.list[0].singer, '蒋雪儿Snow.J')
-  // Web 端 renderDetail 在 info 缺失时直接 return，详情页整页不渲染
+  // Web 端 renderDetail 依赖 info（缺失时整页不渲染），与 kg 详情响应同形
   assert.ok(result.info, '详情响应必须带 info')
   assert.match(result.info.name, /抖音流行热歌/)
   assert.match(result.info.img, /\.jpg$/)
   assert.equal(result.info.author, '菊离')
 })
 
-test('getListDetail: 末页切片（471 条 → 第 24 页 11 条），不重复请求', async () => {
+test('getListDetail: page>1 返回空列表不重复请求', async () => {
   clearCache()
   const urls: string[] = []
   setFetcher(fetcherFor(urls, { detail: detailBody }))
   const page1 = await songList.getListDetail('7200303206223773734', 1)
-  const page24 = await songList.getListDetail('7200303206223773734', 24)
+  const page2 = await songList.getListDetail('7200303206223773734', 2)
 
-  assert.equal(urls.length, 1) // 整单缓存：第二页不重新请求
-  assert.equal(page24.total, 471)
-  assert.equal(page24.list.length, 471 - 23 * 20)
-  assert.equal(page24.page, 24)
+  assert.equal(urls.length, 1) // 全量已在 page 1，page 2 无需请求
+  assert.equal(page1.list.length, 471)
+  assert.deepEqual(page2.list, [])
+  assert.equal(page2.page, 2)
 })
 
 test('getList: 空 tagId 回退默认标签（热歌），不发空关键词', async () => {
