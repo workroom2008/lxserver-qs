@@ -1,0 +1,134 @@
+name: Sync Upstream (XCQ0607/lxserver)
+
+# 每周自动同步上游 main 到本仓库 main：
+# - 无冲突：合并 + 汽水(qs)功能冒烟护栏通过后推送（自动触发 ghcr 镜像构建）
+# - 有冲突 / 护栏不通过：中止（绝不自动覆盖 qs 功能），创建 issue 提醒手动处理
+on:
+  schedule:
+    - cron: '0 3 * * 1' # 每周一 03:00 UTC（北京时间周一 11:00）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch upstream
+        run: |
+          git remote add upstream https://github.com/XCQ0607/lxserver.git
+          git fetch upstream main
+
+      - name: Check for upstream changes
+        id: changes
+        run: |
+          count=$(git rev-list --count main..upstream/main)
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "Upstream new commits: $count"
+
+      - name: Merge upstream/main
+        id: merge
+        if: steps.changes.outputs.count != '0'
+        run: |
+          if git merge upstream/main --no-edit; then
+            echo "merged=true" >> "$GITHUB_OUTPUT"
+          else
+            git merge --abort
+            echo "merged=false" >> "$GITHUB_OUTPUT"
+            echo "::error::合并上游产生冲突，已中止，需手动处理（保留 qs 功能）"
+          fi
+
+      # 合并冲突 → 开 issue 并失败退出（防重：已有 open 的同类 issue 则不重复创建）
+      - name: Create issue on merge conflict
+        if: steps.merge.outputs.merged == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          existing=$(gh issue list --state open --search "sync-upstream in:title" --json number --jq 'length')
+          if [ "$existing" -eq 0 ]; then
+            gh issue create --title "[sync-upstream] 上游合并冲突，需手动处理" --body "$(cat <<'EOF'
+          每周自动同步上游 [XCQ0607/lxserver](https://github.com/XCQ0607/lxserver) 时发生**合并冲突**，已自动中止（未推送任何提交），需要手动合并。
+
+          手动步骤：
+
+          ```bash
+          git remote add upstream https://github.com/XCQ0607/lxserver.git
+          git fetch upstream main
+          git checkout main
+          git merge upstream/main
+          # 解决冲突后
+          git push origin main
+          ```
+
+          **解冲突原则：必须保留汽水(qs)功能的全部代码块**（来源为 feat(qs)/fix(qs) 提交），包括：
+
+          - `src/server/sources/userApi.ts`：qs 音质钳制（`normalizeQualityForSource` / `QS_QUALITY_RANKS`）
+          - `src/server/server.ts`：`source.qs.maxQuality` 的 GET 回显与 POST 保存处理
+          - `src/defaultConfig.ts`：`source.qs.maxQuality` 默认值（flac）
+          - `public/index.html`、`public/app.js`：后台“汽水音质上限”设置项
+          - `src/modules/utils/musicSdk/qs/`：汽水音源模块
+          EOF
+          )"
+          fi
+          exit 1
+
+      # 汽水功能冒烟护栏：合并后关键代码必须在，防止上游改动或自动合并悄悄抹掉 qs 功能
+      - name: QS feature smoke guard
+        if: steps.merge.outputs.merged == 'true'
+        run: |
+          set -e
+          check() {
+            if ! grep -qF "$2" "$1"; then
+              echo "::error::汽水(qs)功能缺失: $1 未包含 \"$2\""
+              exit 1
+            fi
+            echo "OK: $1 含 \"$2\""
+          }
+          check src/server/sources/userApi.ts "normalizeQualityForSource"
+          check src/server/sources/userApi.ts "QS_QUALITY_RANKS"
+          check src/server/server.ts "source.qs.maxQuality"
+          check src/defaultConfig.ts "source.qs.maxQuality"
+          check public/index.html "source.qs.maxQuality"
+          check public/index.html "汽水音质上限"
+          check public/app.js "source.qs.maxQuality"
+          test -d src/modules/utils/musicSdk/qs || { echo "::error::汽水(qs)音源模块目录缺失: src/modules/utils/musicSdk/qs"; exit 1; }
+          echo "QS smoke guard passed."
+
+      - name: Create issue on failed guard
+        if: failure() && steps.merge.outputs.merged == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          existing=$(gh issue list --state open --search "sync-upstream in:title" --json number --jq 'length')
+          if [ "$existing" -eq 0 ]; then
+            gh issue create --title "[sync-upstream] 合并成功但汽水(qs)护栏未通过" --body "$(cat <<'EOF'
+          每周自动同步上游时合并成功，但**汽水(qs)功能冒烟护栏未通过**（关键代码被上游改动或自动合并抹掉），已中止（未推送任何提交），需要手动检查合并结果并恢复缺失的 qs 功能。
+
+          在本地执行 `git merge upstream/main` 复现冲突/缺失点，恢复 qs 代码后手动推送。
+          EOF
+          )"
+          fi
+          exit 1
+
+      - name: Push merged main
+        if: steps.merge.outputs.merged == 'true'
+        run: git push origin main
