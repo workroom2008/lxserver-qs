@@ -7569,6 +7569,7 @@ const handleStartServer = async (port = 9527, ip = '0.0.0.0') => await new Promi
             'subsonic.cachePlaylist': global.lx.config['subsonic.cachePlaylist'] ?? false,
             'subsonic.publicLeaderboards': global.lx.config['subsonic.publicLeaderboards'] ?? false,
             'subsonic.leaderboardSource': global.lx.config['subsonic.leaderboardSource'] ?? 'tx',
+            'source.qs.maxQuality': global.lx.config['source.qs.maxQuality'] ?? 'flac',
             'subsonic.sharedListMode': global.lx.config['subsonic.sharedListMode'] ?? 'leaderboard',
             'subsonic.sharedListSort': global.lx.config['subsonic.sharedListSort'] ?? 'hot',
             'subsonic.dislikeRating': global.lx.config['subsonic.dislikeRating'] ?? 1,
@@ -7854,7 +7855,7 @@ const handleStartServer = async (port = 9527, ip = '0.0.0.0') => await new Promi
               if (configBackupChanged) global.lx.rescheduleConfigBackup?.()
               if (newConfig['source.qs.maxQuality'] !== undefined) {
                 const qsMax = String(newConfig['source.qs.maxQuality']).trim()
-                global.lx.config['source.qs.maxQuality'] = ['128k', '320k', 'flac'].includes(qsMax) ? qsMax : '320k'
+                global.lx.config['source.qs.maxQuality'] = ['128k', '320k', 'flac'].includes(qsMax) ? qsMax : 'flac'
               }
               if (newConfig['subsonic.onlineSearch'] !== undefined) global.lx.config['subsonic.onlineSearch'] = newConfig['subsonic.onlineSearch']
               if (newConfig['subsonic.onlineSearchMode'] !== undefined) global.lx.config['subsonic.onlineSearchMode'] = newConfig['subsonic.onlineSearchMode']
