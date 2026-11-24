@@ -4282,7 +4282,7 @@ class SubsonicHandler {
 
     private async fetchOnlineSearchSongs(cleanQuery: string, sources: string[], limit: number = 30): Promise<{ music: LX.Music.MusicInfo, listId: string }[]> {
         if (!cleanQuery) return []
-        const validSources = sources.filter(s => ['wy', 'tx', 'kw', 'kg', 'mg'].includes(s) && musicSdk[s]?.musicSearch?.search)
+        const validSources = sources.filter(s => ['wy', 'tx', 'kw', 'kg', 'mg', 'qs'].includes(s) && musicSdk[s]?.musicSearch?.search)
         const cacheKey = `${cleanQuery.toLowerCase()}::${validSources.join(',')}`
         const cached = this.onlineSearchCache.get(cacheKey)
         if (cached && cached.expiresAt > Date.now()) return cached.results
@@ -4532,7 +4532,7 @@ class SubsonicHandler {
             cleanQuery = rawQuery.slice(colonIdx + 1).trim()
         } else {
             // 检查指定的音源前缀: wy:, tx:, kw:, kg:, mg:
-            const knownSources = ['wy', 'tx', 'kw', 'kg', 'mg']
+            const knownSources = ['wy', 'tx', 'kw', 'kg', 'mg', 'qs']
             let matchedPrefixSource = ''
             for (const s of knownSources) {
                 if (lowerQuery.startsWith(`${s}:`) || lowerQuery.startsWith(`${s}：`)) {
